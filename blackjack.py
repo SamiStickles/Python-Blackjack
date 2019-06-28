@@ -92,7 +92,7 @@ def print_board():
     |     |_|
     |_____|
 
-    Bet: """ + str(GAME_PLAYER.bet) + "\n")
+    Bet: """ + str(GAME_CHIPS.bet) + "\n")
 
     line_by_line = [[], [], [], [], []]
     line_by_line_split_hand = [[], [], [], [], []]
@@ -118,7 +118,7 @@ def print_board():
     for s_line in line_by_line_split_hand:
         print(" ".join(s_line))
 
-    print("\nPLAYER: " + str(GAME_PLAYER.bankroll) + "\n")
+    print("\nPLAYER: " + str(GAME_CHIPS.bankroll) + "\n")
 
 """separate top and bottom labels because 10 is 2 characters long,
 so we need to add back that space on the others so the spacing stays the same"""
@@ -149,48 +149,18 @@ VALUES = {"Ace": 11, "Two": 2, "Three": 3, "Four": 4,
           "Five": 5, "Six": 6, "Seven": 7, "Eight": 8, "Nine": 9,
           "Ten": 10, "Jack": 10, "Queen": 10, "King": 10}
 
-class Player:
-    """player class, tracks hand, bet, chips, and is instantiated for each new player"""
+class Chips:
+    """chips class for each player, tracks the bankroll and bets and is not reset between rounds"""
 
     def __init__(self, bankroll=100):
-        #empty array to add cards to during gameplay
-        #sum is the sum of all cards in players hand
-        #aces is the number of aces
-        self.hand = []
-        self.sum = 0
-        self.split_hand = []
-        self.split_sum = 0
-        self.split_bet = 0
-        self.aces = 0
+        self.bankroll = bankroll
         self.bet = 0
         self.insurance_bet = 0
-        self.bankroll = bankroll
-        self.split_or_double = False
+        self.split_bet = 0
 
     def __str__(self):
-        """method to let player be printed, shows the cards in the player's hand, and
-        iterates through list of cards in hand to dislpay as string here"""
-        hand_string = ""
-        for card in self.hand:
-            hand_string += str(card) + "\n"
-        return "\nPLAYER has: \n" + hand_string + "\n" + "and" + str(self.bankroll) + "chips."
-
-    def hit(self, card):
-        """this method adds a card to the hand"""
-        self.hand.append(card)
-        self.sum += VALUES[card.rank]
-
-        #adds 1 to the aces count if the new card is an ace
-        if card.rank == "Ace":
-            self.aces += 1
-
-    def split_hit(self, card):
-        """this method adds a card to the split hand"""
-        self.split_hand.append(card)
-        self.split_sum += VALUES[card.rank]
-
-        if card.rank == "Ace":
-            self.aces += 1
+        """when chips is printed, this will show"""
+        return "PLAYER has: " + str(self.bankroll) + " chips."
 
     def lose_bet(self):
         """removes the bet from the bankroll if the player loses"""
@@ -221,23 +191,10 @@ class Player:
         must use int() on self.bet here or else it will get turned into float"""
         self.bankroll += int(self.bet * 1.5)
 
-    def decide_ace(self):
-        """this decides whether ace being 1 or 11 is better for the player.
-        If the sum is over 21 and there are aces remaining to be accounted for in the hand,
-        then we subtract 10 from the sum (essentially making an 11 ace a 1) and then
-        remove the ace from the aces count"""
-        while self.sum > 21 and self.aces:
-            self.sum -= 10
-            self.aces -= 1
-
-        while self.split_sum > 21 and self.aces:
-            self.split_sum -= 10
-            self.aces -= 1
-
 """creates an instance of player for each player BEFORE the loop,
 so their chips do not get reset"""
 #num_players = int(input("How many players? (1-4) "))
-GAME_PLAYER = Player()
+GAME_CHIPS = Chips()
 
 """controls initial game setup (creating deck and shuffling, taking bet,
 dealing initial cards, creating player deck and dealer instances).
@@ -286,7 +243,6 @@ while True:
             self.deck.append(Card("Spades", "Ten"))
             self.deck.append(Card("Clubs", "Ten"))
 
-
         def __str__(self):
             """str method in case we want to print whole deck for debugging,
             adds each card in deck to deck_string with a new line separating each card"""
@@ -303,10 +259,62 @@ while True:
             """method to deal the top card from the deck, used with hit()"""
             return self.deck.pop()
 
+    class Player:
+        """player class, tracks hand and is reset each round"""
+        def __init__(self):
+            #empty array to add cards to during gameplay
+            #sum is the sum of all cards in players hand
+            #aces is the number of aces
+            self.hand = []
+            self.sum = 0
+            self.split_hand = []
+            self.split_sum = 0
+            self.aces = 0
+            self.split_or_double = False
+
+        def __str__(self):
+            """method to let player be printed, shows the cards in the player's hand, and
+            iterates through list of cards in hand to dislpay as string here"""
+            hand_string = ""
+            for card in self.hand:
+                hand_string += str(card) + "\n"
+            return "\nPLAYER has: \n" + hand_string + "\n" + "and" + str(self.bankroll) + "chips."
+
+        def hit(self, card):
+            """this method adds a card to the hand"""
+            self.hand.append(card)
+            self.sum += VALUES[card.rank]
+
+            #adds 1 to the aces count if the new card is an ace
+            if card.rank == "Ace":
+                self.aces += 1
+
+        def split_hit(self, card):
+            """this method adds a card to the split hand"""
+            self.split_hand.append(card)
+            self.split_sum += VALUES[card.rank]
+
+            if card.rank == "Ace":
+                self.aces += 1
+
+        def decide_ace(self):
+            """this decides whether ace being 1 or 11 is better for the player.
+            If the sum is over 21 and there are aces remaining to be accounted for in the hand,
+            then we subtract 10 from the sum (essentially making an 11 ace a 1) and then
+            remove the ace from the aces count"""
+            while self.sum > 21 and self.aces:
+                self.sum -= 10
+                self.aces -= 1
+
+            while self.split_sum > 21 and self.aces:
+                self.split_sum -= 10
+                self.aces -= 1
+
     #create instances of the classes we need for the game
     #inside loop, so reset upon game replay
     GAME_DECK = Deck()
-    GAME_DEALER = Player(bankroll=10000)
+    GAME_DEALER = Player()
+    GAME_PLAYER = Player()
 
     def get_bet(chips):
         """function that gets input from player for bet amount, checks if it is a valid number,
@@ -317,8 +325,8 @@ while True:
             except (TypeError, ValueError):
                 print("Not valid, must enter an integer.\n")
             else:
-                if chips.bet <= GAME_PLAYER.bankroll and chips.bet > 0:
-                    GAME_PLAYER.bet = chips.bet
+                if chips.bet <= GAME_CHIPS.bankroll and chips.bet > 0:
+                    GAME_CHIPS.bet = chips.bet
                     print("\nYou bet " + str(chips.bet) + " chips!\n")
                     break
                 else:
@@ -332,11 +340,11 @@ while True:
 
             if GAME_PLAYER.sum > 21:
                 print("Player busts! Dealer wins!\n")
-                GAME_PLAYER.lose_bet()
+                GAME_CHIPS.lose_bet()
                 break
             elif GAME_PLAYER.sum == 21:
                 print("Player got BLACKJACK!\n")
-                GAME_PLAYER.win_blackjack()
+                GAME_CHIPS.win_blackjack()
                 break
 
             move_selection = input("Do you want to hit or stay? ")
@@ -358,11 +366,11 @@ while True:
 
             if which_sum > 21:
                 print("Player busts! You lose this hand.\n")
-                GAME_PLAYER.lose_bet()
+                GAME_CHIPS.lose_bet()
                 break
             elif which_sum == 21:
                 print("Player got BLACKJACK!\n")
-                GAME_PLAYER.win_blackjack()
+                GAME_CHIPS.win_blackjack()
                 break
 
             move_selection = input("Do you want to hit or stay? ")
@@ -400,18 +408,18 @@ while True:
             sleep(1)
         if GAME_DEALER.sum > 21:
             print("Dealer busts! Player wins!\n")
-            GAME_PLAYER.win_bet()
+            GAME_CHIPS.win_bet()
         elif GAME_DEALER.sum == 21:
             print("Dealer got BLACKJACK!\n")
-            GAME_PLAYER.lose_bet()
+            GAME_CHIPS.lose_bet()
         elif GAME_DEALER.sum == GAME_PLAYER.sum:
             print("Round tied!\n")
         elif GAME_DEALER.sum < GAME_PLAYER.sum:
             print("Player got closer to 21! Player wins!\n")
-            GAME_PLAYER.win_bet()
+            GAME_CHIPS.win_bet()
         else:
             print("Dealer got closer to 21! Dealer wins!\n")
-            GAME_PLAYER.lose_bet()
+            GAME_CHIPS.lose_bet()
 
     def print_board_natural():
         """exists so it can be inspected from within the print board
@@ -431,16 +439,16 @@ while True:
 
             if double_down_input in ("yes", "y"):
                 #checks if the player has enough chips to double down
-                if GAME_PLAYER.bankroll >= GAME_PLAYER.bet * 2:
+                if GAME_CHIPS.bankroll >= GAME_CHIPS.bet * 2:
                     GAME_PLAYER.split_or_double = True
-                    GAME_PLAYER.bet *= 2
+                    GAME_CHIPS.bet *= 2
                     #if player doubled down, they get 1 additional card only, then dealer goes
                     GAME_PLAYER.hit(GAME_DECK.deal_card())
-                    GAME_DEALER.decide_ace()
+                    GAME_PLAYER.decide_ace()
                     print_board()
                     if GAME_PLAYER.sum == 21:
                         print("Player got BLACKJACK! Player wins 1.5x their bet!")
-                        GAME_PLAYER.win_blackjack()
+                        GAME_CHIPS.win_blackjack()
                 else:
                     print("You don't have the funds to double down!\n")
 
@@ -457,13 +465,13 @@ while True:
             to the split hand, then it re-adjusts the sums of the two hands"""
             if split_input in ("yes", "y"):
                 #checks if the player has enough chips to split
-                if GAME_PLAYER.bankroll >= GAME_PLAYER.bet * 2:
+                if GAME_CHIPS.bankroll >= GAME_CHIPS.bet * 2:
                     GAME_PLAYER.split_or_double = True
                     split_card = GAME_PLAYER.hand.pop()
                     GAME_PLAYER.split_hand.append(split_card)
                     GAME_PLAYER.split_sum = VALUES[split_card.rank]
                     GAME_PLAYER.sum -= VALUES[split_card.rank]
-                    GAME_PLAYER.split_bet = GAME_PLAYER.bet
+                    GAME_CHIPS.split_bet = GAME_CHIPS.bet
                     print_board()
                 else:
                     print("You don't have the funds to split this hand!\n")
@@ -473,7 +481,7 @@ while True:
             if GAME_PLAYER.hand[0].rank == "Ace":
                 GAME_PLAYER.hit(GAME_DECK.deal_card())
                 GAME_PLAYER.split_hit(GAME_DECK.deal_card())
-                GAME_DEALER.decide_ace()
+                GAME_PLAYER.decide_ace()
                 print_board()
             else:
             #if the player split on any other pair, the round is fully played out for first hand before moving to split hand
@@ -501,7 +509,7 @@ while True:
                 print("Invalid answer. Please enter yes, no, y or n.\n")
 
             if insurance_input in ("yes", "y"):
-                if GAME_PLAYER.bankroll - GAME_PLAYER.bet > 0:
+                if GAME_CHIPS.bankroll - GAME_CHIPS.bet > 0:
                     while True:
                         try:
                             insurance_num = int(input("\nHow many chips do you want to bet? You can bet up to half of your original bet. "))
@@ -509,8 +517,8 @@ while True:
                             print("Not valid, must enter an integer.\n")
                         else:
                             #if the insurance num given is between 0 and 1/2 the original bet, and if the player has enough chips for both bets
-                            if 0 < insurance_num <= int(GAME_PLAYER.bet / 2) and GAME_PLAYER.bankroll - GAME_PLAYER.bet >= insurance_num:
-                                GAME_PLAYER.insurance_bet = insurance_num
+                            if 0 < insurance_num <= int(GAME_CHIPS.bet / 2) and GAME_CHIPS.bankroll - GAME_CHIPS.bet >= insurance_num:
+                                GAME_CHIPS.insurance_bet = insurance_num
                                 sleep(0.6)
                                 print("\nYou placed an insurance bet of " + str(insurance_num) + " chips!\n")
                                 sleep(0.6)
@@ -520,13 +528,13 @@ while True:
 
                     #if the value of the dealer's other card is 10, give the player their insurance bet
                     if VALUES[GAME_DEALER.hand[1].rank] == 10:
-                        GAME_PLAYER.win_insurance_bet()
+                        GAME_CHIPS.win_insurance_bet()
                         print("Dealer had a ten-card!\n")
                         sleep(0.6)
                         print("But at least you got insurance!\n")
                         sleep(0.6)
                     else:
-                        GAME_PLAYER.lose_insurance_bet()
+                        GAME_CHIPS.lose_insurance_bet()
                         print("Dealer did not have a ten-card.\n")
                         sleep(0.6)
                         print("You lost your insurance bet.\n")
@@ -550,8 +558,8 @@ while True:
     GAME_DEALER.decide_ace()
 
     #get the bet from the player
-    print("PLAYER has " + str(GAME_PLAYER.bankroll) + " chips to play with.\n")
-    get_bet(GAME_PLAYER)
+    print("PLAYER has " + str(GAME_CHIPS.bankroll) + " chips to play with.\n")
+    get_bet(GAME_CHIPS)
 
     #tell the player what cards they have, and the dealers one face up card
     print_board()
@@ -572,12 +580,12 @@ while True:
             break
         elif GAME_PLAYER.sum == 21:
             print("Player got 21! Player wins!\n")
-            GAME_PLAYER.win_blackjack()
+            GAME_CHIPS.win_blackjack()
             break
         elif GAME_DEALER.sum == 21:
             print_board_natural()
             print("Dealer got 21! Dealer wins!\n")
-            GAME_PLAYER.lose_bet()
+            GAME_CHIPS.lose_bet()
             break
 
         #checks for special hand (5,5)
@@ -588,19 +596,6 @@ while True:
         #checks for special cases and asks player if they want to use them
         double_down()
         split()
-
-        #check for bust or blackjack after special cases
-        #pretty sure this can be deleted
-        """
-        if GAME_PLAYER.sum == 21:
-            print("Player got 21! Player wins!\n")
-            GAME_PLAYER.win_bet()
-            break
-        elif GAME_PLAYER.sum > 21:
-            print("Player busts, dealer wins!\n")
-            GAME_PLAYER.lose_bet()
-            break
-        """
 
         #after natural check and special cases input, gets player's move
         if not GAME_PLAYER.split_or_double:
@@ -613,7 +608,7 @@ while True:
         break
 
     #if player has no chips left, asks if they want to buy more to keep game going
-    if GAME_PLAYER.bankroll == 0:
+    if GAME_CHIPS.bankroll == 0:
 
         while True:
             MORE_CHIPS = input("You don't have any chips left! Buy more? ").lower()
@@ -630,21 +625,15 @@ while True:
                     print("Not valid, must enter an integer.\n")
                 else:
                     if 1 <= CHIPS_BUY <= 1000:
-                        GAME_PLAYER.bankroll = CHIPS_BUY
+                        GAME_CHIPS.bankroll = CHIPS_BUY
                         print("\nYou bought " + str(CHIPS_BUY) + " more chips!\n")
                         break
                     else:
                         print("You cannot buy this amount!\n")
 
-            #resets attributes of each player's hand, except for bankroll
-            #like passing cards back to dealer after each hand
-            GAME_PLAYER.hand = []
-            GAME_PLAYER.sum = 0
-            GAME_PLAYER.split_hand = []
-            GAME_PLAYER.split_sum = 0
-            GAME_PLAYER.insurance_bet = 0
-            GAME_PLAYER.aces = 0
-            GAME_PLAYER.split_or_double = False
+            #resets attributes of chips that are checked in other parts of the program to prevent bugs
+            GAME_CHIPS.split_bet = 0
+            GAME_CHIPS.insurance_bet = 0
             print(CLEAR)
             continue
         else:
@@ -661,13 +650,8 @@ while True:
         #either resets player's hand or shuts down program.
         if RESPONSE in ("yes", "y"):
             print(CLEAR)
-            GAME_PLAYER.hand = []
-            GAME_PLAYER.sum = 0
-            GAME_PLAYER.aces = 0
-            GAME_PLAYER.split_hand = []
-            GAME_PLAYER.split_sum = 0
-            GAME_PLAYER.insurance_bet = 0
-            GAME_PLAYER.split_or_double = False
+            GAME_CHIPS.split_bet = 0
+            GAME_CHIPS.insurance_bet = 0
             continue
         else:
             print("Powering down...")
