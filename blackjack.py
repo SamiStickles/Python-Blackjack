@@ -365,11 +365,15 @@ while True:
         while True:
 
             if which_sum > 21:
+                sleep(0.6)
                 print("Player busts! You lose this hand.\n")
+                sleep(0.6)
                 GAME_CHIPS.lose_bet()
                 break
             elif which_sum == 21:
+                sleep(0.6)
                 print("Player got BLACKJACK!\n")
+                sleep(0.6)
                 GAME_CHIPS.win_blackjack()
                 break
 
@@ -394,31 +398,36 @@ while True:
 
             print("Invalid answer. Must enter 'hit' or 'stay'. \n")
 
-    def dealer_move():
+    def dealer_move(which_sum):
         """performs dealer moves after player has stayed,
         adds cards to dealers hand up to 17 or over player"""
 
         print_board()
-        sleep(1)
+        sleep(1.2)
 
-        while GAME_DEALER.sum < 17 and GAME_DEALER.sum <= GAME_PLAYER.sum:
+        while GAME_DEALER.sum < 17 and GAME_DEALER.sum <= which_sum:
             GAME_DEALER.hit(GAME_DECK.deal_card())
             GAME_DEALER.decide_ace()
             print_board()
             sleep(1)
         if GAME_DEALER.sum > 21:
             print("Dealer busts! Player wins!\n")
+            sleep(0.6)
             GAME_CHIPS.win_bet()
         elif GAME_DEALER.sum == 21:
             print("Dealer got BLACKJACK!\n")
+            sleep(0.6)
             GAME_CHIPS.lose_bet()
-        elif GAME_DEALER.sum == GAME_PLAYER.sum:
+        elif GAME_DEALER.sum == which_sum:
             print("Round tied!\n")
-        elif GAME_DEALER.sum < GAME_PLAYER.sum:
+            sleep(0.6)
+        elif GAME_DEALER.sum < which_sum:
             print("Player got closer to 21! Player wins!\n")
+            sleep(0.6)
             GAME_CHIPS.win_bet()
         else:
             print("Dealer got closer to 21! Dealer wins!\n")
+            sleep(0.6)
             GAME_CHIPS.lose_bet()
 
     def print_board_natural():
@@ -489,8 +498,10 @@ while True:
                 print("Now playing the split hand...")
                 split_get_move(GAME_PLAYER.split_sum, GAME_PLAYER.split_hand)
                 #if one or both hands haven't busted or got 21, dealer moves and reports outcome
-                if GAME_PLAYER.sum < 21 or GAME_PLAYER.split_sum < 21:
-                    dealer_move()
+                if GAME_PLAYER.sum < 21:
+                    dealer_move(GAME_PLAYER.sum)
+                if GAME_PLAYER.split_sum < 21:
+                    dealer_move(GAME_PLAYER.split_sum)
                 GAMEOVER = True
 
     def insurance():
@@ -601,9 +612,9 @@ while True:
         if not GAME_PLAYER.split_or_double:
             get_move()
 
-        #if player did not bust or get 21, dealer moves
-        if GAME_PLAYER.sum < 21 or 0 < GAME_PLAYER.split_sum < 21:
-            dealer_move()
+        #if player did not bust or get 21, and did not split, dealer moves
+        if GAME_PLAYER.sum < 21 and GAME_PLAYER.split_sum == 0:
+            dealer_move(GAME_PLAYER.sum)
         GAMEOVER = True
         break
 
