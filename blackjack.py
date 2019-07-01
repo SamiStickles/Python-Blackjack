@@ -53,34 +53,34 @@ def print_board():
     print("\n" * 7)
     print("DEALER\n")
 
-    line_by_line = [[], [], [], [], []]
+    lines = [[], [], [], [], []]
 
     #print dealer cards
     #if the function is called from dealer_move, the cards are all revealed
     # if it is called from anywhere else, the second card is hidden
-    if inspect.stack()[1][3] in ("dealer_move", "print_board_natural"):
+    if inspect.stack()[1][3] in ("dealer_move", "print_board_revealed"):
         for card in GAME_DEALER.hand:
-            line_by_line[0].append(ASCII_TEMPLATE[0])
-            line_by_line[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
-            line_by_line[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-            line_by_line[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-            line_by_line[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
+            lines[0].append(ASCII_TEMPLATE[0])
+            lines[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
+            lines[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+            lines[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+            lines[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
 
     else:
-        line_by_line[0].append(ASCII_TEMPLATE[0])
-        line_by_line[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[GAME_DEALER.hand[0].rank]))
-        line_by_line[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[GAME_DEALER.hand[0].suit]))
-        line_by_line[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[GAME_DEALER.hand[0].suit]))
-        line_by_line[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[GAME_DEALER.hand[0].rank]))
+        lines[0].append(ASCII_TEMPLATE[0])
+        lines[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[GAME_DEALER.hand[0].rank]))
+        lines[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[GAME_DEALER.hand[0].suit]))
+        lines[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[GAME_DEALER.hand[0].suit]))
+        lines[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[GAME_DEALER.hand[0].rank]))
 
-        line_by_line[0].append(ASCII_TEMPLATE[0])
-        line_by_line[1].append(ASCII_TEMPLATE[1].format("# "))
-        line_by_line[2].append(ASCII_TEMPLATE[2].format(" "))
-        line_by_line[3].append(ASCII_TEMPLATE[2].format(" "))
-        line_by_line[4].append(ASCII_TEMPLATE[3].format("_#"))
+        lines[0].append(ASCII_TEMPLATE[0])
+        lines[1].append(ASCII_TEMPLATE[1].format("# "))
+        lines[2].append(ASCII_TEMPLATE[2].format(" "))
+        lines[3].append(ASCII_TEMPLATE[2].format(" "))
+        lines[4].append(ASCII_TEMPLATE[3].format("_#"))
 
     #join method prints the lines of the cards as strings concatenated by a space, not arrays
-    for line in line_by_line:
+    for line in lines:
         print(" ".join(line))
 
 
@@ -94,28 +94,28 @@ def print_board():
 
     Bet: """ + str(GAME_CHIPS.bet) + "\n")
 
-    line_by_line = [[], [], [], [], []]
-    line_by_line_split_hand = [[], [], [], [], []]
+    lines = [[], [], [], [], []]
+    lines_split_hand = [[], [], [], [], []]
 
     #print player cards
     for card in GAME_PLAYER.hand:
-        line_by_line[0].append(ASCII_TEMPLATE[0])
-        line_by_line[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
-        line_by_line[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-        line_by_line[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-        line_by_line[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
+        lines[0].append(ASCII_TEMPLATE[0])
+        lines[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
+        lines[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+        lines[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+        lines[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
 
     for card in GAME_PLAYER.split_hand:
-        line_by_line_split_hand[0].append(ASCII_TEMPLATE[0])
-        line_by_line_split_hand[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
-        line_by_line_split_hand[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-        line_by_line_split_hand[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
-        line_by_line_split_hand[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
+        lines_split_hand[0].append(ASCII_TEMPLATE[0])
+        lines_split_hand[1].append(ASCII_TEMPLATE[1].format(ASCII_LABELS_TOP[card.rank]))
+        lines_split_hand[2].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+        lines_split_hand[3].append(ASCII_TEMPLATE[2].format(ASCII_SUITS[card.suit]))
+        lines_split_hand[4].append(ASCII_TEMPLATE[3].format(ASCII_LABELS_BOTTOM[card.rank]))
 
-    for line in line_by_line:
+    for line in lines:
         print(" ".join(line))
 
-    for s_line in line_by_line_split_hand:
+    for s_line in lines_split_hand:
         print(" ".join(s_line))
 
     print("\nPLAYER: " + str(GAME_CHIPS.bankroll) + "\n")
@@ -156,7 +156,6 @@ class Chips:
         self.bankroll = bankroll
         self.bet = 0
         self.insurance_bet = 0
-        self.split_bet = 0
 
     def __str__(self):
         """when chips is printed, this will show"""
@@ -178,17 +177,9 @@ class Chips:
         """adds twice the insurance bet to the bankroll if the dealer does have 21"""
         self.bankroll += self.insurance_bet * 2
 
-    def lose_split_bet(self):
-        """removes the split bet amount from the bankroll if the player loses the split hand"""
-        self.bankroll -= self.split_bet
-
-    def win_split_bet(self):
-        """adds the split bet amount to the bankroll if the player wins the split hand"""
-        self.bankroll += self.split_bet
-
     def win_blackjack(self):
         """adds 1.5x the bet to the bankroll if the player gets a natural blackjack,
-        must use int() on self.bet here or else it will get turned into float"""
+        must use int() on self.bet here or else it will be turned into float"""
         self.bankroll += int(self.bet * 1.5)
 
 """creates an instance of player for each player BEFORE the loop,
@@ -200,9 +191,6 @@ GAME_CHIPS = Chips()
 dealing initial cards, creating player deck and dealer instances).
 Game restarts from here in case of replay"""
 while True:
-
-    #global gameover variable that controls the while loop for the game
-    GAMEOVER = False
 
     class Card:
         """card class that gets appended to the deck in every configuration"""
@@ -223,7 +211,7 @@ while True:
         """deck class containing 52 cards, A-K in 4 suits"""
         def __init__(self):
             """goes through each rank in each suit, creates a card and appends to deck"""
-            
+
             self.deck = []
             """
             for suit in SUITS:
@@ -278,7 +266,7 @@ while True:
             hand_string = ""
             for card in self.hand:
                 hand_string += str(card) + "\n"
-            return "\nPLAYER has: \n" + hand_string + "\n" + "and" + str(self.bankroll) + "chips."
+            return "\nPLAYER has: \n" + hand_string + "\n"
 
         def hit(self, card):
             """this method adds a card to the hand"""
@@ -332,36 +320,10 @@ while True:
                 else:
                     print("You cannot bet this much!\n")
 
-    def get_move():
+    def play_hand(which_sum, which_hand):
         """function asks for move decision, checks if it is valid and
-        either deals another card or ends the player's turn. Once the player
-        stays or a bust or blackjack occurs, the loop ends."""
-        while True:
-
-            if GAME_PLAYER.sum > 21:
-                print("Player busts! Dealer wins!\n")
-                GAME_CHIPS.lose_bet()
-                break
-            elif GAME_PLAYER.sum == 21:
-                print("Player got BLACKJACK!\n")
-                GAME_CHIPS.win_blackjack()
-                break
-
-            move_selection = input("Do you want to hit or stay? ")
-
-            if move_selection.lower() in ("hit", "h"):
-                GAME_PLAYER.hit(GAME_DECK.deal_card())
-                GAME_PLAYER.decide_ace()
-                print_board()
-                continue
-            elif move_selection.lower() in ("stay", "s"):
-                break
-
-            print("Invalid answer. Must enter 'hit' or 'stay'. \n")
-
-    def split_get_move(which_sum, which_hand):
-        """function called when player splits on a non-Ace pair,
-        plays out the hand passed in as a parameter"""
+        either deals another card or ends the player's turn. Once the player stays or a bust
+        or blackjack occurs, the loop ends; plays out the hand passed in as a parameter"""
         while True:
 
             if which_sum > 21:
@@ -430,7 +392,7 @@ while True:
             sleep(0.6)
             GAME_CHIPS.lose_bet()
 
-    def print_board_natural():
+    def print_board_revealed():
         """exists so it can be inspected from within the print board
         function to see which version of the board to print"""
         sleep(1)
@@ -480,7 +442,6 @@ while True:
                     GAME_PLAYER.split_hand.append(split_card)
                     GAME_PLAYER.split_sum = VALUES[split_card.rank]
                     GAME_PLAYER.sum -= VALUES[split_card.rank]
-                    GAME_CHIPS.split_bet = GAME_CHIPS.bet
                     print_board()
                 else:
                     print("You don't have the funds to split this hand!\n")
@@ -493,16 +454,16 @@ while True:
                 GAME_PLAYER.decide_ace()
                 print_board()
             else:
-            #if the player split on any other pair, the round is fully played out for first hand before moving to split hand
-                split_get_move(GAME_PLAYER.sum, GAME_PLAYER.hand)
+                """if the player split on any other pair, the round is fully played out for
+                first hand before moving to split hand"""
+                play_hand(GAME_PLAYER.sum, GAME_PLAYER.hand)
                 print("Now playing the split hand...")
-                split_get_move(GAME_PLAYER.split_sum, GAME_PLAYER.split_hand)
+                play_hand(GAME_PLAYER.split_sum, GAME_PLAYER.split_hand)
                 #if one or both hands haven't busted or got 21, dealer moves and reports outcome
                 if GAME_PLAYER.sum < 21:
                     dealer_move(GAME_PLAYER.sum)
                 if GAME_PLAYER.split_sum < 21:
                     dealer_move(GAME_PLAYER.split_sum)
-                GAMEOVER = True
 
     def insurance():
         """checks if the dealer's face up card is an Ace, and if so asks player
@@ -527,7 +488,8 @@ while True:
                         except (TypeError, ValueError):
                             print("Not valid, must enter an integer.\n")
                         else:
-                            #if the insurance num given is between 0 and 1/2 the original bet, and if the player has enough chips for both bets
+                            """if the insurance num given is between 0 and 1/2 the original bet,
+                            and if the player has enough chips for both bets"""
                             if 0 < insurance_num <= int(GAME_CHIPS.bet / 2) and GAME_CHIPS.bankroll - GAME_CHIPS.bet >= insurance_num:
                                 GAME_CHIPS.insurance_bet = insurance_num
                                 sleep(0.6)
@@ -537,7 +499,7 @@ while True:
                             else:
                                 print("You cannot bet this much!\n")
 
-                    #if the value of the dealer's other card is 10, give the player their insurance bet
+                    #if the value of dealer's down card is 10, give the player the insurance bet
                     if VALUES[GAME_DEALER.hand[1].rank] == 10:
                         GAME_CHIPS.win_insurance_bet()
                         print("Dealer had a ten-card!\n")
@@ -576,7 +538,7 @@ while True:
     print_board()
 
     #this loop controls the player's turn and goes until someone wins
-    while not GAMEOVER:
+    while True:
 
         #check for requirements to make insurance bet and ask
         insurance()
@@ -586,7 +548,7 @@ while True:
         need to refer to the gameover while loop"""
         if GAME_DEALER.sum == GAME_PLAYER.sum and GAME_DEALER.sum == 21:
             #shows board with dealers card exposed if dealer gets a natural
-            print_board_natural()
+            print_board_revealed()
             print("Player and Dealer both got 21! Round tied!\n")
             break
         elif GAME_PLAYER.sum == 21:
@@ -594,7 +556,7 @@ while True:
             GAME_CHIPS.win_blackjack()
             break
         elif GAME_DEALER.sum == 21:
-            print_board_natural()
+            print_board_revealed()
             print("Dealer got 21! Dealer wins!\n")
             GAME_CHIPS.lose_bet()
             break
@@ -610,12 +572,11 @@ while True:
 
         #after natural check and special cases input, gets player's move
         if not GAME_PLAYER.split_or_double:
-            get_move()
+            play_hand(GAME_PLAYER.sum, GAME_PLAYER.hand)
 
         #if player did not bust or get 21, and did not split, dealer moves
         if GAME_PLAYER.sum < 21 and GAME_PLAYER.split_sum == 0:
             dealer_move(GAME_PLAYER.sum)
-        GAMEOVER = True
         break
 
     #if player has no chips left, asks if they want to buy more to keep game going
@@ -642,8 +603,8 @@ while True:
                     else:
                         print("You cannot buy this amount!\n")
 
-            #resets attributes of chips that are checked in other parts of the program to prevent bugs
-            GAME_CHIPS.split_bet = 0
+            """resets attributes of chips that are checked in
+            other parts of the program to prevent bugs"""
             GAME_CHIPS.insurance_bet = 0
             print(CLEAR)
             continue
@@ -661,7 +622,6 @@ while True:
         #either resets player's hand or shuts down program.
         if RESPONSE in ("yes", "y"):
             print(CLEAR)
-            GAME_CHIPS.split_bet = 0
             GAME_CHIPS.insurance_bet = 0
             continue
         else:
