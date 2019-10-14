@@ -433,22 +433,23 @@ while True:
 
             #then play each hand all the way through separately
             #if the player split on a pair of aces, only 1 card is dealt to each hand
-            if GAME_PLAYER.hand[0].rank == "Ace":
-                GAME_PLAYER.hit(GAME_DECK.deal_card(), False)
-                GAME_PLAYER.hit(GAME_DECK.deal_card(), True)
-                GAME_PLAYER.decide_ace()
-                print_board()
-            else:
-                #if the player split on any other pair, the round is fully played out for
-                #first hand before moving to split hand
-                play_hand(GAME_PLAYER.sum, GAME_PLAYER.hand)
-                print("Now playing the split hand...\n")
-                play_hand(GAME_PLAYER.split_sum, GAME_PLAYER.split_hand)
-                #if one or both hands haven't busted or got 21, dealer moves and reports outcome
-                if GAME_PLAYER.sum < 21:
-                    dealer_move(GAME_PLAYER.sum)
-                if GAME_PLAYER.split_sum < 21:
-                    dealer_move(GAME_PLAYER.split_sum)
+            if GAME_PLAYER.split_or_double == True:
+                if GAME_PLAYER.hand[0].rank == "Ace":
+                    GAME_PLAYER.hit(GAME_DECK.deal_card(), False)
+                    GAME_PLAYER.hit(GAME_DECK.deal_card(), True)
+                    GAME_PLAYER.decide_ace()
+                    print_board()
+                else:
+                    #if the player split on any other pair, the round is fully played out for
+                    #first hand before moving to split hand
+                    play_hand(GAME_PLAYER.sum, GAME_PLAYER.hand)
+                    print("Now playing the split hand...\n")
+                    play_hand(GAME_PLAYER.split_sum, GAME_PLAYER.split_hand)
+                    #if one or both hands haven't busted or got 21, dealer moves and reports outcome
+                    if GAME_PLAYER.sum < 21:
+                        dealer_move(GAME_PLAYER.sum)
+                    if GAME_PLAYER.split_sum < 21:
+                        dealer_move(GAME_PLAYER.split_sum)
 
     def insurance():
         """checks if the dealer's face up card is an Ace, and if so asks player
@@ -538,6 +539,7 @@ while True:
             print("Player and Dealer both got 21! Round tied!\n")
             break
         elif GAME_PLAYER.sum == 21:
+            print_board_revealed()
             print("Player got 21! Player wins!\n")
             GAME_CHIPS.win_blackjack()
             break
